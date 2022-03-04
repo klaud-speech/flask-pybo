@@ -10,16 +10,22 @@
         </tr>
         </thead>
         <tbody>
+        <!-- 전달받은 context... question_list  -->
         {% if question_list %}
         {% for question in question_list.items %}
         <tr>
+            <!-- 질문사항(question) 번호 ... -->
             <td>{{ question_list.total - ((question_list.page-1) * question_list.per_page) - loop.index0 }}</td>
+            <!-- 질문사항(question) 제목..(하이퍼링크 제공..) ... -->
             <td>
+                <!-- Route 정보 : BluePorint의  네이밈에 대한 (.)함수로 접근????-->
                 <a href="{{ url_for('question.detail', question_id=question.id) }}">{{ question.subject }}</a>
                 {% if question.answer_set|length > 0 %}
+                <!-- 질문사항(question).  답변사항... -->
                 <span class="text-danger small ml-2">{{ question.answer_set|length }}</span>
                 {% endif %}
             </td>
+            <!-- 질문사항  질문이 등록된 시각 정보 -->
             <td>{{ question.create_date | datetime }}</td>
         </tr>
         {% endfor %}
@@ -71,6 +77,8 @@
         {% endif %}
     </ul>
     <!-- 페이징처리 끝 -->
+
+    <!-- 신규 등록 질문.. -->
     <a href="{{ url_for('question.create') }}" class="btn btn-primary">질문 등록하기</a>
 </div>
 {% endblock %}
