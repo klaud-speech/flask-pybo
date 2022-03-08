@@ -13,11 +13,19 @@
             <!-- 질문 : 내용 -->
             <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div>
             <div class="d-flex justify-content-end">
-                <div class="badge baged-light p-2">
+                <div class="badge baged-light p-2 text-left">
+                    <div class="mb-2">{{ question.user.username }}</div>
                     <!-- 질문이 생성된 날짜 정보 -->
-                    {{ question.create_date |datetime }}
+                    <div> {{ question.create_date |datetime }} </div>
                 </div>
             </div>
+            {% if g.user == question.user %}
+            <div class="my-3">
+                <a href="{{ url_for('question.modify', question_id=question.id) }}"
+                             class="btn btn-sm btn-outline-secondary">수정</a>
+            </div>
+            {% endif %}
+
         </div>
     </div>
     <!-- 질문에 대한 답변 사항..-->
@@ -27,8 +35,10 @@
         <div class="card-body">
             <div class="card-text" style="white-space: pre-line;"> {{ answer.content }} </div>
             <div class="d-flex justify-content-end">
-                <div class="badge badge-light p-2">
-                    {{ answer.create_data |datetime }}
+                <div class="badge badge-light p-2 text-left">
+                    <div class="mb-2">{{ question.user.username }}</div>
+                    <!-- 질문이 생성된 날짜 정보 -->
+                    <div> {{ question.create_date |datetime }} </div>
                 </div>
             </div>
         </div>
@@ -49,7 +59,8 @@
         <div class="form-group">
             <!-- name과 id 는 아직 구분이 안됨...-->
             <!-- forms.py로 연결됨...-->
-            <textarea name = "content" id="content" class="form-control" rows = "15"></textarea>
+            <textarea {% if not g.user %}disabled{% endif %}
+                    name = "content" id="content" class="form-control" rows = "15"></textarea>
         </div>
         <input type="submit" value="답변등록" class="btn btn-primary">
     </form>

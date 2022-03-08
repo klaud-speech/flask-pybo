@@ -1,12 +1,14 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, url_for
+from flask import Blueprint, render_template, request, url_for, g, flash
 from werkzeug.utils import redirect
 from werkzeug.utils import secure_filename # for fileupload Function
 
 from .. import db
 from ..forms import QuestionForm, AnswerForm
 from ..models import Question
+
+from pybo.views.auth_views import login_required
 
 bp = Blueprint('question', __name__, url_prefix='/question')
 
@@ -29,15 +31,34 @@ def detail(question_id):
     # 질문에 대한 상세 정보를 출력한다.  질문에 대한 내용과. 그에 따른 답변사항.. 및 새로운 답변을 달 수 있도록 Form 로 연결해서 보낸다.
     return render_template('question/question_detail.html', question=question, form=form)
 
+@bp.route('/modify/<int:question_id>', methods=('GET', 'POST'))
+@login_required
+def modify(question_id):
+    question = Question.query.get_or_404(question_id)
+    if g.user != question.user:
+        flash('수정권한이 없습니다')
+        return redirect(url_for('question.detail', question_id=question_id))
+    if request.method == 'POST':  # POST 요청
+        form = QuestionForm()
+        if form.validate_on_submit():
+            form.populate_obj(question)
+            question.modify_date = datetime.now()  # 수정일시 저장
+            db.session.commit()
+            return redirect(url_for('question.detail', question_id=question_id))
+    else:  # GET 요청
+        form = QuestionForm(obj=question)
+    return render_template('question/question_form.html', form=form)
+
 
 @bp.route('/create/', methods=('GET', 'POST'))
+@login_required
 def create():
     #질문 등록할 수 있는 Form ...
     form = QuestionForm()
     # requests는 자동은로 넘어오고, 잡근 가능한듯..Routing...
     if request.method == 'POST' and form.validate_on_submit():
         # form문에서 넘어오면..(submit 후).... 데이터베이스 모델...Question.. 을 생성...models.py...
-        question = Question(subject=form.subject.data, content=form.content.data, create_date=datetime.now())
+        question = Question(subject=form.subject.data, content=form.content.data, create_date=datetime.now(), user=g.user )
         db.session.add(question)
         db.session.commit()
         return redirect(url_for('main.index'))
