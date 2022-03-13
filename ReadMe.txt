@@ -4,5 +4,5 @@ https://wikidocs.net/81039
 #set FLASK_ENV=development
 #flask run
 
-git 테스트 완료...
+git 테스트 완료... 
 
